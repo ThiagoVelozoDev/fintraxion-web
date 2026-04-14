@@ -116,11 +116,98 @@ export function TransactionsPage() {
 
   const activeRecurring = recurring.filter((r) => r.active)
 
+  // ── Saldo dos fixos ──────────────────────────────────────────
+  const recurringIn  = useMemo(
+    () => activeRecurring.filter((r) =>  TYPE_META[r.type].positive).reduce((s, r) => s + r.amount, 0),
+    [activeRecurring],
+  )
+  const recurringOut = useMemo(
+    () => activeRecurring.filter((r) => !TYPE_META[r.type].positive).reduce((s, r) => s + r.amount, 0),
+    [activeRecurring],
+  )
+  const recurringBalance = recurringIn - recurringOut
+
+  // ── Saldo dos avulsos ────────────────────────────────────────
+  const entriesIn  = useMemo(
+    () => entries.filter((e) =>  TYPE_META[e.type].positive).reduce((s, e) => s + e.amount, 0),
+    [entries],
+  )
+  const entriesOut = useMemo(
+    () => entries.filter((e) => !TYPE_META[e.type].positive).reduce((s, e) => s + e.amount, 0),
+    [entries],
+  )
+  const entriesBalance = entriesIn - entriesOut
+
+  // ── Total do mês ─────────────────────────────────────────────
+  const totalBalance = recurringBalance + entriesBalance
+
+  function balanceClass(v: number) {
+    return v > 0 ? 'balance-cell-value amount-positive'
+         : v < 0 ? 'balance-cell-value amount-negative'
+         : 'balance-cell-value balance-cell-value-zero'
+  }
+
+  function fmtSigned(v: number) {
+    return (v > 0 ? '+' : '') + fmt.format(v)
+  }
+
   return (
     <div className="page-content">
       <div className="page-header">
         <h2>{t('Transactions', 'Lançamentos')}</h2>
         <p>{t('Monthly view of all financial movements.', 'Visão mensal de todas as movimentações financeiras.')}</p>
+      </div>
+
+      {/* ── Balance summary ── */}
+      <div className="card balance-bar">
+        {/* Saldo Fixos */}
+        <div className="balance-cell">
+          <span className="balance-cell-label">
+            {t('Recurring Balance', 'Saldo dos Fixos')}
+          </span>
+          <span className={balanceClass(recurringBalance)}>
+            {fmtSigned(recurringBalance)}
+          </span>
+          <span className="balance-cell-sub">
+            <span className="balance-in">↑ {fmt.format(recurringIn)}</span>
+            {' · '}
+            <span className="balance-out">↓ {fmt.format(recurringOut)}</span>
+          </span>
+        </div>
+
+        <div className="balance-sep" aria-hidden>+</div>
+
+        {/* Saldo Avulsos */}
+        <div className="balance-cell">
+          <span className="balance-cell-label">
+            {t('One-time Balance', 'Saldo dos Avulsos')}
+          </span>
+          <span className={balanceClass(entriesBalance)}>
+            {fmtSigned(entriesBalance)}
+          </span>
+          <span className="balance-cell-sub">
+            <span className="balance-in">↑ {fmt.format(entriesIn)}</span>
+            {' · '}
+            <span className="balance-out">↓ {fmt.format(entriesOut)}</span>
+          </span>
+        </div>
+
+        <div className="balance-sep" aria-hidden>=</div>
+
+        {/* Saldo Total */}
+        <div className="balance-cell balance-cell-total">
+          <span className="balance-cell-label">
+            {t('Month Balance', 'Saldo do Mês')}
+          </span>
+          <span className={balanceClass(totalBalance)}>
+            {fmtSigned(totalBalance)}
+          </span>
+          <span className="balance-cell-sub">
+            {totalBalance >= 0
+              ? t('Positive cash flow', 'Fluxo positivo')
+              : t('Negative cash flow', 'Fluxo negativo')}
+          </span>
+        </div>
       </div>
 
       {/* ── Recurring section ── */}
