@@ -11,7 +11,19 @@ const IconLogout = () => (
   </svg>
 )
 
-export function Header() {
+const IconHamburger = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <line x1="3" y1="6"  x2="21" y2="6"  />
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+)
+
+type HeaderProps = {
+  onMenuToggle: () => void
+}
+
+export function Header({ onMenuToggle }: HeaderProps) {
   const navigate = useNavigate()
   const { language, setLanguage, t } = useLanguage()
 
@@ -22,6 +34,16 @@ export function Header() {
 
   return (
     <header className="topbar">
+      {/* Hamburger — só aparece no mobile/tablet via CSS */}
+      <button
+        aria-label={t('Open menu', 'Abrir menu')}
+        className="hamburger-btn"
+        onClick={onMenuToggle}
+        type="button"
+      >
+        <IconHamburger />
+      </button>
+
       <div className="topbar-left">
         <h1 className="topbar-title">
           {t('Financial Command Center', 'Central de Comando Financeiro')}
@@ -45,10 +67,9 @@ export function Header() {
           className="btn btn-ghost btn-sm"
           onClick={handleLogout}
           type="button"
-          title={t('Logout', 'Sair')}
         >
           <IconLogout />
-          {t('Logout', 'Sair')}
+          <span className="btn-label-desktop">{t('Logout', 'Sair')}</span>
         </button>
 
         <div className="topbar-avatar" title="User">U</div>

@@ -44,27 +44,52 @@ const IconBolt = () => (
   </svg>
 )
 
-export function Sidebar() {
+const IconClose = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
+type SidebarProps = {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { t } = useLanguage()
 
   const links = [
-    { to: '/dashboard',    label: t('Dashboard',   'Painel'),           icon: <IconGrid /> },
-    { to: '/fixed-costs',  label: t('Recurring',   'Lançamentos Fixos'),icon: <IconRepeat /> },
-    { to: '/transactions', label: t('Transactions','Lançamentos'),       icon: <IconList /> },
-    { to: '/insights',     label: t('Insights',    'Insights'),          icon: <IconChart /> },
-    { to: '/settings',     label: t('Settings',    'Configurações'),     icon: <IconSettings /> },
+    { to: '/dashboard',    label: t('Dashboard',        'Painel'),             icon: <IconGrid /> },
+    { to: '/fixed-costs',  label: t('Recurring',        'Lançamentos Fixos'),  icon: <IconRepeat /> },
+    { to: '/transactions', label: t('Transactions',     'Lançamentos'),        icon: <IconList /> },
+    { to: '/insights',     label: t('Insights',         'Insights'),           icon: <IconChart /> },
+    { to: '/settings',     label: t('Settings',         'Configurações'),      icon: <IconSettings /> },
   ]
 
   return (
-    <aside className="sidebar">
-      <NavLink to="/dashboard" className="sidebar-brand">
-        <div className="sidebar-brand-icon">
-          <IconBolt />
-        </div>
-        <span className="sidebar-brand-name">
-          Fin<span>traxion</span>
-        </span>
-      </NavLink>
+    <aside className={`sidebar${isOpen ? ' sidebar-open' : ''}`}>
+      {/* Topo: brand + botão fechar (mobile) */}
+      <div className="sidebar-top">
+        <NavLink to="/dashboard" className="sidebar-brand" onClick={onClose}>
+          <div className="sidebar-brand-icon">
+            <IconBolt />
+          </div>
+          <span className="sidebar-brand-name">
+            Fin<span>traxion</span>
+          </span>
+        </NavLink>
+
+        {/* Botão fechar — só aparece no mobile via CSS */}
+        <button
+          aria-label={t('Close menu', 'Fechar menu')}
+          className="sidebar-close-btn"
+          onClick={onClose}
+          type="button"
+        >
+          <IconClose />
+        </button>
+      </div>
 
       <p className="sidebar-section-label">{t('Navigation', 'Navegação')}</p>
 
@@ -73,6 +98,7 @@ export function Sidebar() {
           <NavLink
             key={link.to}
             to={link.to}
+            onClick={onClose}
             className={({ isActive }) =>
               `sidebar-link${isActive ? ' sidebar-link-active' : ''}`
             }
