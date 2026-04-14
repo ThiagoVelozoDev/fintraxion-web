@@ -1,0 +1,69 @@
+---
+description: Analytics strategy for financial insights and behavioral intelligence
+globs: **/*
+alwaysApply: true
+---
+
+# Analytics Strategy
+
+## Objective
+
+Transform raw financial data into actionable insights and behavioral intelligence.
+
+## Analysis Types
+
+### 1. Financial Analysis
+
+- Revenue vs Expenses
+- Profit calculation
+- Monthly summaries
+
+### 2. Behavioral Analysis
+
+- Spending patterns
+- Recurring behavior
+- Impulse detection
+
+### 3. Trend Analysis
+
+- Growth or decline in income
+- Expense trends
+- Investment evolution
+
+## KPIs
+
+- Net Profit
+- Savings Rate
+- Debt Ratio
+- Net Worth
+- Burn Rate
+
+## Alerts
+
+- High debt ratio
+- Low savings rate
+- Increasing expenses trend
+- Liquidity risk
+
+## Processing Strategy
+
+### Daily Jobs
+
+- Update balances
+- Detect anomalies
+
+### Monthly Jobs
+
+- Consolidate financial data
+- Generate reports
+
+## Output
+
+- Insights
+- Alerts
+- Recommendations
+
+## Future
+
+- Predictive analytics
+- AI-driven recommendations

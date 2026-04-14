@@ -1,0 +1,65 @@
+---
+description: Backend structure and layering standards for the financial platform
+globs: **/*
+alwaysApply: true
+---
+
+# Backend Structure
+
+## Stack
+
+- Node.js
+- NestJS
+- Prisma
+- PostgreSQL
+
+## Architecture Layers
+
+### 1. Modules Layer
+
+Handles domain separation.
+
+- transactions
+- accounts
+- debts
+- investments
+
+### 2. Domain Layer
+
+Contains business rules.
+
+- services
+- rules
+- validators
+
+### 3. Analytics Layer
+
+Handles intelligence.
+
+- analysis services
+- jobs
+- insights
+
+### 4. Infrastructure Layer
+
+Handles technical concerns.
+
+- database
+- queues
+- external APIs
+
+## Folder Structure
+
+```text
+/src
+  /modules
+  /domain
+  /analytics
+  /infra
+```
+
+## Rules
+
+- No business logic in controllers
+- Services must be reusable
+- Analytics must be isolated

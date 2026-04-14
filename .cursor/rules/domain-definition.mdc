@@ -1,0 +1,97 @@
+---
+description: Financial domain model and core entity definitions
+globs: **/*
+alwaysApply: true
+---
+
+# Domain Definition
+
+## Overview
+
+This application models personal finance using enterprise financial principles, where users operate as a financial entity.
+
+## Core Entities
+
+### 1. Transactions
+
+Represents all financial movements.
+
+**Types:**
+
+- INCOME
+- EXPENSE
+
+**Attributes:**
+
+- id
+- amount
+- type
+- categoryId
+- accountId
+- date
+- description
+
+### 2. Categories
+
+Classifies transactions.
+
+**Types:**
+
+- FIXED_COST
+- VARIABLE_COST
+- INVESTMENT
+- INCOME
+
+### 3. Accounts
+
+Represents financial containers.
+
+**Examples:**
+
+- Bank account
+- Wallet
+- Credit card
+
+### 4. Debts
+
+Represents liabilities.
+
+**Attributes:**
+
+- totalAmount
+- remainingAmount
+- interestRate
+- dueDate
+- installmentValue
+
+### 5. Investments
+
+Represents capital allocation.
+
+**Attributes:**
+
+- type
+- investedAmount
+- currentValue
+- yield
+
+## Financial Concepts
+
+- **Revenue** = total income
+- **Cost** = total expenses
+- **Profit** = revenue - cost
+- **Liabilities** = debts
+- **Assets** = investments + available balance
+
+## Derived Metrics
+
+- Net Profit
+- Savings Rate
+- Debt Ratio
+- Net Worth
+
+## Rules
+
+- Every transaction must be categorized
+- No orphan financial records
+- Historical data must never be overwritten

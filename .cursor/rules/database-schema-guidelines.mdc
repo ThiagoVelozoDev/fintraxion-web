@@ -1,0 +1,47 @@
+---
+description: Database schema conventions and constraints for financial data modeling
+globs: **/*
+alwaysApply: true
+---
+
+# Database Schema Guidelines
+
+## Database
+
+- PostgreSQL
+
+## Principles
+
+- Normalize data
+- Maintain referential integrity
+- Design for analytics
+
+## Naming Conventions
+
+- snake_case for tables and columns
+- plural table names
+
+## Relationships
+
+- transactions -> categories
+- transactions -> accounts
+- debts -> accounts
+- investments -> accounts
+
+## Time-Series Strategy
+
+- Always store timestamps
+- Never overwrite historical data
+- Prefer append-only patterns
+
+## Constraints
+
+- Foreign keys required
+- Avoid nullable critical fields
+- Use indexes for performance
+
+## Performance
+
+- Index date fields
+- Index foreign keys
+- Use aggregation queries for reports

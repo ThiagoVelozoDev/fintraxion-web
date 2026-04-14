@@ -1,0 +1,209 @@
+---
+description: Standard tech stack and architecture baseline for financial platform projects
+globs: **/*
+alwaysApply: true
+---
+
+# Tech Stack & Architecture Overview
+
+## Overview
+
+This application is a personal financial management platform with an enterprise mindset, where users manage their finances as if they were running a company.
+
+The system is designed to provide:
+
+- Full financial control
+- Strategic analysis
+- Intelligent insights generation
+- Scalability for AI and automation
+
+## Architectural Principles
+
+- Backend-driven logic: all business rules must reside in the backend
+- Separation of concerns: clear and well-defined layers
+- Data-first approach: decisions driven by data
+- Scalability by design: built to grow
+- Intelligence-ready: prepared for analytics and AI
+
+## Frontend
+
+### Stack
+
+- React
+- Vite
+- TypeScript
+- TailwindCSS
+- React Hook Form
+- Zod
+
+### Responsibilities
+
+- User interface (UI/UX)
+- Data input handling
+- Form validation
+- API consumption
+
+### Best Practices
+
+- Never implement financial logic on the frontend
+- Use Zod integrated with React Hook Form for validation
+- Prioritize component reusability and modularity
+
+## Backend
+
+### Stack
+
+- Node.js
+- NestJS
+
+### Responsibilities
+
+- Business logic
+- Financial processing
+- API exposure (REST or GraphQL)
+- Authentication and authorization
+- Orchestration of analytics
+
+### Recommended Structure
+
+```text
+/src
+  /modules
+    /transactions
+    /accounts
+    /debts
+    /investments
+  /domain
+    /services
+    /rules
+  /analytics
+    /services
+    /jobs
+  /infra
+    /database
+    /queue
+```
+
+## Database
+
+### Technology
+
+- PostgreSQL
+
+### Justification
+
+- Supports complex queries
+- Strong relational consistency
+- Ideal for financial analytics
+- Scalable and reliable
+
+## ORM
+
+### Technology
+
+- Prisma
+
+### Responsibilities
+
+- Object-relational mapping
+- Versioned migrations
+- Strong typing with TypeScript
+
+## Infrastructure
+
+### Platform
+
+- Render
+
+### Recommended Setup
+
+- Service 1: API (backend)
+- Service 2: Worker (jobs/cron processing)
+- Database: Managed PostgreSQL
+
+## Intelligence Layer
+
+### Objective
+
+Transform financial data into actionable insights.
+
+### Analysis Services
+
+Responsible for interpreting financial data:
+
+- FinancialAnalysisService
+- BehaviorAnalysisService
+- TrendAnalysisService
+
+### Jobs (Asynchronous Processing)
+
+Executed periodically:
+
+- Daily analysis
+- Monthly consolidation
+- Metrics calculation
+- Alert generation
+
+### Structure
+
+```text
+/analytics
+  /jobs
+    daily-analysis.job.ts
+    monthly-summary.job.ts
+  /services
+    financial-analysis.service.ts
+    behavior.service.ts
+```
+
+## Financial Domain
+
+### Core Entities
+
+- Transactions (income and expenses)
+- Categories
+- Accounts
+- Debts
+- Investments
+
+### Applied Concepts
+
+- Income = revenue
+- Expenses = operational costs
+- Profit = net result
+- Debt = liabilities
+- Investments = capital allocation
+
+## Key Metrics (KPIs)
+
+- Monthly net profit
+- Savings rate
+- Debt ratio
+- Total net worth
+- Personal burn rate
+
+## Critical Rules
+
+- No financial logic should exist in the frontend
+- All metrics must be calculated in the backend
+- Data must be stored with historical tracking (time-series)
+- Avoid duplication of business logic
+
+## Future Evolution
+
+- Open Finance integration
+- Personal financial scoring system
+- AI-driven recommendation engine
+- Autonomous financial agents
+- Scenario simulation (what-if analysis)
+
+## Summary
+
+This stack is designed to ensure:
+
+- High scalability
+- Clear architecture
+- Advanced analytical capability
+- Strong foundation for AI-driven features
+
+This document should be used as a standard baseline for all future related projects.

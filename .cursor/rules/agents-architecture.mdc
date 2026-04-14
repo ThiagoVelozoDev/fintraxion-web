@@ -1,0 +1,68 @@
+---
+description: Multi-agent architecture and orchestration strategy for financial intelligence
+globs: **/*
+alwaysApply: true
+---
+
+# Agents Architecture
+
+## Objective
+
+Enable modular, intelligent analysis through specialized agents.
+
+## Agents Overview
+
+### 1. Data Analyst Agent
+
+- Processes raw data
+- Identifies patterns
+
+### 2. Financial Analyst Agent
+
+- Interprets financial metrics
+- Generates insights
+
+### 3. Risk Agent
+
+- Detects financial risks
+- Generates alerts
+
+### 4. Investment Advisor Agent
+
+- Suggests allocation strategies
+
+### 5. Debt Strategy Agent
+
+- Builds debt repayment plans
+
+## Communication Flow
+
+1. Data Analyst -> processes data
+2. Financial Analyst -> interprets
+3. Risk Agent -> evaluates risks
+4. Strategy Agents -> recommend actions
+
+## Implementation Strategy
+
+### Phase 1 (Cursor)
+
+- Use `.mdc` files as agent definitions
+- Manual orchestration via prompts
+
+### Phase 2 (Backend)
+
+- Convert agents into services
+- Use jobs and queues
+- Automate execution
+
+## Rules
+
+- Each agent must have a single responsibility
+- Avoid overlapping logic
+- Keep agents modular
+
+## Future
+
+- Autonomous agents
+- AI integration
+- Real-time decision engines

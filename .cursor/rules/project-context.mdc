@@ -1,0 +1,211 @@
+---
+description: Product and strategic context for Fintraxion
+globs: **/*
+alwaysApply: true
+---
+
+# Project Context: Fintraxion
+
+## Purpose
+
+A personal finance web application with an entrepreneurial mindset, where users stop treating finances as basic budgeting and start operating like a one-person company (personal life with a business management mentality).
+
+The system turns financial data into strategic decisions, focused on:
+
+- Financial sustainability
+- Wealth growth
+- Capital efficiency
+- Risk reduction (debt, loss of control, impulsive behavior)
+
+## Core Concept
+
+"Your financial life should be managed like a company."
+
+This implies:
+
+- Income != salary -> it is revenue
+- Expenses != casual spending -> they are operating costs
+- Leftover money != idle cash -> it is profit / reinvestment
+- Debt != a generic problem -> it is a liability to be managed strategically
+
+## Main Domains
+
+### 1. Income
+
+- Salary
+- Extra income
+- Passive income
+- Non-recurring inflows
+
+Metrics:
+
+- Total monthly revenue
+- Revenue growth
+- Income source diversification
+
+### 2. Expenses
+
+Classified with a business perspective:
+
+- **Fixed Costs**
+  - Rent
+  - Internet
+  - Subscriptions
+  - School
+- **Variable Costs**
+  - Food
+  - Leisure
+  - Transportation
+  - Shopping
+
+Metrics:
+
+- % fixed cost vs revenue
+- % variable cost vs revenue
+- Total operating cost
+
+### 3. Investments
+
+- Fixed income
+- Equities
+- Funds
+- Crypto (optional)
+
+Metrics:
+
+- Total net worth
+- Return performance
+- Monthly contribution
+- % of revenue invested
+
+### 4. Debts (Liabilities)
+
+- Credit card debt
+- Loans
+- Financing
+
+Important attributes:
+
+- Interest rate
+- Term
+- Total amount
+- Installment value
+
+### 5. Debt Action Plan
+
+An intelligent system that:
+
+- Prioritizes debts by:
+  - Interest rate (avalanche method)
+  - Amount (snowball method)
+- Suggests:
+  - Early payment
+  - Consolidation
+  - Payoff strategies
+
+## Analytics Layer (Core Differentiator)
+
+### 1. Behavioral Analysis
+
+The system identifies patterns such as:
+
+- Spending increases on specific days
+- Impulsive consumption
+- Credit dependency
+- Lack of consistency in investing
+
+Insight example:
+
+> "You tend to spend 35% more on weekends."
+
+### 2. Financial Trends
+
+- Revenue evolution
+- Wealth growth or decline
+- Debt trend
+- Future balance projection
+
+### 3. Smart Insights
+
+Expected automated interpretations:
+
+- "Your fixed cost is above 60% of revenue - high risk."
+- "You are reinvesting less than needed for growth."
+- "Your highest-interest debt is not being prioritized."
+
+### 4. Strategic Alerts
+
+- Insolvency risk
+- Liquidity decline
+- Liability increase
+- Low investment rate
+
+## Key Indicators (KPIs)
+
+- Monthly net profit
+- Savings rate (% of revenue)
+- Debt ratio
+- Personal liquidity index
+- Accumulated net worth
+- Personal burn rate
+
+## Conceptual Architecture
+
+Layers:
+
+1. **Data Layer**
+   - Financial transactions
+   - Categories
+   - Accounts
+   - History
+2. **Domain Layer**
+   - Financial rules
+   - Classifications (fixed, variable, investment, debt)
+3. **Intelligence Layer**
+   - Behavioral analysis
+   - Trend models
+   - Insight generation
+4. **Presentation Layer**
+   - Financial dashboard
+   - Reports
+   - Alerts
+   - Action plan
+
+## Agents (Multi-Agent Architecture)
+
+- **Financial Analyst Agent**
+  - Analyzes financial data
+  - Generates insights and recommendations
+- **Data Analyst Agent**
+  - Identifies patterns and trends
+  - Performs statistical analysis
+- **Risk Monitoring Agent**
+  - Detects financial risk
+  - Triggers alerts
+- **Investment Advisor Agent**
+  - Suggests investment strategies
+- **Debt Strategy Agent**
+  - Builds debt action plans
+
+## Competitive Differentiator
+
+- Not only financial tracking -> strategic management
+- Not only data display -> interpretation and guidance
+- Behavior-focused -> not just numbers
+- Entrepreneurial mindset applied to personal finance
+
+## Possible Future Features
+
+- Personal financial score
+- Scenario simulation (example: "what if I increase my income?")
+- Bank integration (Open Finance)
+- Conversational financial AI
+- Goal planning (home, car, retirement)
+
+## Executive Summary
+
+The application turns the user into the manager of their own financial life by combining:
+
+- Business-style structure
+- Data intelligence
+- Decision automation
