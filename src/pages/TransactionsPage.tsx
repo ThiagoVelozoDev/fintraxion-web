@@ -1,6 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { db } from '../lib/firebase'
+import { useAuth } from '../contexts/AuthContext'
 import {
   ALL_TYPES,
   TYPE_META,
@@ -18,27 +30,6 @@ type FinancialEntry = {
   category_id: string
   amount: number
   date: string
-}
-
-const STORAGE_KEY      = 'fintraxion_financial_entries'
-const RECURRING_KEY    = 'fintraxion_recurring_templates'
-
-function loadEntries(): FinancialEntry[] {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return []
-  try {
-    const parsed = JSON.parse(raw) as FinancialEntry[]
-    return Array.isArray(parsed) ? parsed : []
-  } catch { return [] }
-}
-
-function loadRecurring(): RecurringTemplate[] {
-  const raw = localStorage.getItem(RECURRING_KEY)
-  if (!raw) return []
-  try {
-    const parsed = JSON.parse(raw) as RecurringTemplate[]
-    return Array.isArray(parsed) ? parsed : []
-  } catch { return [] }
 }
 
 const IconPlus = () => (
@@ -69,35 +60,53 @@ function currentMonthLabel(): string {
 }
 
 export function TransactionsPage() {
+  const { user } = useAuth()
+  const uid = user!.uid
   const { t, language } = useLanguage()
-  const [entries, setEntries] = useState<FinancialEntry[]>(() => loadEntries())
-  const [recurring]           = useState<RecurringTemplate[]>(() => loadRecurring())
 
-  const [title,       setTitle]       = useState('')
-  const [type,        setType]        = useState<EntryType>('variable_cost')
-  const [categoryId,  setCategoryId]  = useState('')
-  const [amount,      setAmount]      = useState('')
-  const [date,        setDate]        = useState(todayStr)
+  const [entries,   setEntries]   = useState<FinancialEntry[]>([])
+  const [recurring, setRecurring] = useState<RecurringTemplate[]>([])
+
+  const [title,      setTitle]      = useState('')
+  const [type,       setType]       = useState<EntryType>('variable_cost')
+  const [categoryId, setCategoryId] = useState('')
+  const [amount,     setAmount]     = useState('')
+  const [date,       setDate]       = useState(todayStr)
 
   const categoriesForType = getCategoriesByType(type)
+
+  useEffect(() => {
+    const q = query(
+      collection(db, 'users', uid, 'transactions'),
+      orderBy('createdAt', 'desc'),
+    )
+    return onSnapshot(q, (snap) => {
+      setEntries(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as FinancialEntry))
+    })
+  }, [uid])
+
+  useEffect(() => {
+    return onSnapshot(collection(db, 'users', uid, 'recurring_templates'), (snap) => {
+      setRecurring(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as RecurringTemplate))
+    })
+  }, [uid])
 
   function handleTypeChange(next: EntryType) {
     setType(next)
     setCategoryId('')
   }
 
-  function saveEntries(next: FinancialEntry[]) {
-    setEntries(next)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-  }
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!title || !categoryId || !amount || !date) return
-    saveEntries([
-      { id: crypto.randomUUID(), title: title.trim(), type, category_id: categoryId, amount: Number(amount), date },
-      ...entries,
-    ])
+    await addDoc(collection(db, 'users', uid, 'transactions'), {
+      title: title.trim(),
+      type,
+      category_id: categoryId,
+      amount: Number(amount),
+      date,
+      createdAt: serverTimestamp(),
+    })
     setTitle('')
     setType('variable_cost')
     setCategoryId('')
@@ -105,8 +114,8 @@ export function TransactionsPage() {
     setDate(todayStr())
   }
 
-  function handleDelete(id: string) {
-    saveEntries(entries.filter((e) => e.id !== id))
+  async function handleDelete(id: string) {
+    await deleteDoc(doc(db, 'users', uid, 'transactions', id))
   }
 
   const fmt = useMemo(
@@ -281,7 +290,7 @@ export function TransactionsPage() {
         <div className="card-header" style={{ marginBottom: '1rem' }}>
           <p className="card-title">{t('Add one-time entry', 'Adicionar lançamento avulso')}</p>
         </div>
-        <form className="form-grid" onSubmit={handleSubmit}>
+        <form className="form-grid" onSubmit={(e) => { void handleSubmit(e) }}>
           <div className="field">
             <label className="field-label" htmlFor="tx-title">{t('Description', 'Descrição')}</label>
             <input
@@ -391,7 +400,7 @@ export function TransactionsPage() {
                       </span>
                     </td>
                     <td>
-                      <button className="btn-icon" onClick={() => handleDelete(item.id)} title={t('Delete', 'Excluir')} type="button">
+                      <button className="btn-icon" onClick={() => { void handleDelete(item.id) }} title={t('Delete', 'Excluir')} type="button">
                         <IconTrash />
                       </button>
                     </td>

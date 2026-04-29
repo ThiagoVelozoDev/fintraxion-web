@@ -1,5 +1,5 @@
 ---
-description: Database schema conventions and constraints for financial data modeling
+description: Database schema conventions and constraints for financial data modeling (Firebase Firestore)
 globs: **/*
 alwaysApply: true
 ---
@@ -8,40 +8,87 @@ alwaysApply: true
 
 ## Database
 
-- PostgreSQL
+- Firebase (Cloud Firestore)
+- Document-oriented NoSQL database
+- Access via Firebase Admin SDK
 
 ## Principles
 
-- Normalize data
-- Maintain referential integrity
-- Design for analytics
+- Design for read performance (denormalization is encouraged)
+- Avoid complex joins (Firestore does NOT support joins)
+- Structure data based on access patterns
+- Prefer duplication over expensive queries when necessary
+
+## Data Modeling
+
+- Use collections to represent domain entities:
+  - transactions
+  - accounts
+  - debts
+  - investments
+
+- Each document must be self-contained when possible
+- Embed frequently accessed related data (e.g., account name inside transaction)
 
 ## Naming Conventions
 
-- snake_case for tables and columns
-- plural table names
+- snake_case for fields
+- collection names in plural (e.g., transactions, accounts)
 
 ## Relationships
 
-- transactions -> categories
-- transactions -> accounts
-- debts -> accounts
-- investments -> accounts
+Firestore does NOT support relational constraints. Relationships must be handled manually:
+
+- Use document references (e.g., account_id, category_id)
+- Avoid deep nesting (max 1–2 levels)
+- Duplicate essential data to avoid additional reads
+
+Examples:
+
+- transactions:
+  - account_id
+  - account_name (duplicated)
+  - category_id
+  - category_name (duplicated)
 
 ## Time-Series Strategy
 
-- Always store timestamps
+- Always store timestamps (created_at, updated_at)
 - Never overwrite historical data
-- Prefer append-only patterns
+- Prefer append-only patterns for financial records
+- Use timestamp-based queries with indexes
 
 ## Constraints
 
-- Foreign keys required
+- No foreign keys (enforced at application level)
+- Validate required fields in application layer
 - Avoid nullable critical fields
-- Use indexes for performance
+- Use Firestore security rules (if applicable)
+
+## Indexing
+
+- Create composite indexes for:
+  - account_id + created_at
+  - category_id + created_at
+- Index fields used in filters and ordering
+- Plan indexes based on query patterns (Firestore requires this)
 
 ## Performance
 
-- Index date fields
-- Index foreign keys
-- Use aggregation queries for reports
+- Minimize number of reads (Firestore charges per read)
+- Avoid N+1 queries
+- Use batched reads/writes when possible
+- Paginate using cursors (NOT offset)
+
+## Analytics Considerations
+
+- Avoid heavy aggregations in real-time queries
+- Precompute data when necessary (via analytics layer)
+- Store aggregated snapshots if needed (e.g., balance, summaries)
+
+## Rules
+
+- Do NOT use relational database concepts (JOIN, FK constraints)
+- Do NOT depend on Prisma or SQL-based ORM
+- All validations and relationships must be enforced in backend
+- Data modeling must prioritize scalability and read efficiency

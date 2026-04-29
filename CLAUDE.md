@@ -15,40 +15,43 @@ No test runner is configured yet.
 
 ## Project Concept
 
-Fintraxion treats personal finance like a business: income = revenue, expenses = operating costs, leftover = profit/reinvestment. The domain vocabulary matters — use Revenue, Operating Costs, Burn Rate, Net Profit, Savings Rate, Debt Ratio, Net Worth, Capital Allocation rather than generic finance terms.
+Fintraxion treats personal finance like a business: income = revenue, expenses = operating costs, leftover = profit/reinvestment. Use enterprise vocabulary — Revenue, Operating Costs, Burn Rate, Net Profit, Savings Rate, Debt Ratio, Net Worth, Capital Allocation — not generic finance terms.
 
 ## Architecture Overview
 
-**Stack:** React 19 + Vite + TypeScript (strict), React Router DOM v7, plain CSS (dark theme)
+**Stack:** React 19 + Vite + TypeScript (strict), React Router DOM v7, plain CSS (dark theme, `src/index.css`)
 
-**App shell:** `main.tsx` wraps the tree in `<LanguageProvider>` + `<BrowserRouter>`. `App.tsx` defines routes. `AppLayout` (sidebar + header + `<Outlet>`) wraps all protected pages. `ProtectedRoute` redirects unauthenticated users to `/login`.
+**App shell:** `main.tsx` wraps in `<LanguageProvider>` + `<BrowserRouter>`. `App.tsx` defines routes. `AppLayout` (sidebar + header + `<Outlet>`) wraps all protected pages. `ProtectedRoute` redirects unauthenticated users to `/login`.
 
 **State management:**
-- Global language preference via Context API (`src/i18n/LanguageContext.tsx`)
-- Auth token persisted to `localStorage` under key `fintraxion_auth`
-- Language persisted to `localStorage` under key `fintraxion_language` (defaults to `'en'`)
-- No Redux or external state library
+- Global language preference via Context API (`src/i18n/LanguageContext.tsx`) — no Redux or external state library
+- All other state is component-local via `useState`
+- Data persisted to `localStorage` under these keys:
+  - `fintraxion_auth` — boolean auth flag (`'true'`)
+  - `fintraxion_language` — `'en'` | `'pt'` (defaults to `'en'`)
+  - `fintraxion_financial_entries` — one-time transaction records
+  - `fintraxion_recurring_templates` — recurring entry templates (FixedCostsPage)
 
-**i18n pattern:** All UI text must go through `const { t } = useLanguage()` — call as `t('English text', 'Portuguese text')`. Do not hardcode strings.
+**i18n pattern:** All UI text must go through `const { t } = useLanguage()` — called as `t('English text', 'Texto em português')`. Never hardcode strings.
 
-## Critical Architectural Constraint
+**Financial categories (`src/data/categories.ts`):** Single source of truth for all entry types and categories. The 6 `EntryType` values (`revenue`, `fixed_cost`, `variable_cost`, `expense`, `investment`, `debt`) and 50+ categories are defined here with bilingual names (`name_en`, `name_pt`). Use `getCategoriesByType()` and `getCategoryById()` helpers. `TYPE_META` provides display metadata (badge class, positive/negative flag).
 
-**No financial logic in the frontend.** All calculations, metrics, and business rules must come from the backend API. The frontend only renders data it receives. This is a hard rule from the project architecture.
+## Critical Architectural Constraints
+
+- **No financial logic in the frontend.** All calculations, metrics, and business rules must come from the backend API. The frontend only renders data it receives.
+- **All current dashboard metrics are hardcoded mock data** — the backend is not yet implemented.
+- **Authentication is a mock** — login only sets a boolean in localStorage; there is no real auth backend.
 
 ## Planned (Not Yet Implemented) Stack
 
 Per `.cursor/rules/tech-stack-architecture.mdc`:
-- **Backend:** NestJS (Node.js) with layered architecture (controller → service → repository)
-- **Database:** PostgreSQL via Prisma ORM (snake_case, plural table names, append-only for time-series)
-- **Validation:** Zod + React Hook Form
+- **Backend:** NestJS with layered architecture: modules → domain → analytics → infra
+- **Database:** PostgreSQL via Prisma ORM (snake_case, plural table names, append-only for time-series data)
+- **Forms/Validation:** React Hook Form + Zod
 - **CSS:** TailwindCSS (current plain CSS is interim)
 - **Infrastructure:** Render platform (separate API and Worker services)
 
-When adding backend modules, follow NestJS conventions: business logic in services (never controllers), DTOs for all inputs, Prisma for DB access.
-
-## Cursor Agents
-
-`.cursor/agents/` defines specialized AI agents (Financial Analyst, Data Analyst, Risk, Investment Advisor, Debt Strategy, Fullstack Specialist). These represent planned backend services/jobs, not frontend features.
+When adding backend modules: business logic in services (never controllers), DTOs for all inputs, Prisma for DB access. Analytics jobs run asynchronously (daily analysis, monthly consolidation).
 
 ## Naming Conventions
 
@@ -56,4 +59,4 @@ When adding backend modules, follow NestJS conventions: business logic in servic
 - Components: PascalCase exports only
 - Hooks: prefix with `use`
 - localStorage keys: `UPPER_SNAKE_CASE` constants (e.g., `AUTH_KEY`, `LANGUAGE_KEY`)
-- TypeScript: strict mode, `noUnusedLocals` and `noUnusedParameters` are enforced — unused variables will fail the build
+- TypeScript strict mode enforces `noUnusedLocals` and `noUnusedParameters` — unused variables fail the build

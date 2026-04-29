@@ -1,5 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { db } from '../lib/firebase'
+import { useAuth } from '../contexts/AuthContext'
 import {
   ALL_TYPES,
   CATEGORIES,
@@ -18,23 +31,6 @@ export type RecurringTemplate = {
   amount: number
   day: number
   active: boolean
-}
-
-const STORAGE_KEY = 'fintraxion_recurring_templates'
-
-function loadTemplates(): RecurringTemplate[] {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return []
-  try {
-    const parsed = JSON.parse(raw) as RecurringTemplate[]
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-
-function saveToStorage(templates: RecurringTemplate[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(templates))
 }
 
 const IconPlus = () => (
@@ -68,40 +64,52 @@ function emptyForm() {
 }
 
 export function FixedCostsPage() {
+  const { user } = useAuth()
+  const uid = user!.uid
   const { t, language } = useLanguage()
-  const [templates, setTemplates] = useState<RecurringTemplate[]>(() => loadTemplates())
-  const [form, setForm] = useState(emptyForm())
-  const [editingId, setEditingId] = useState<string | null>(null)
+
+  const [templates,  setTemplates]  = useState<RecurringTemplate[]>([])
+  const [form,       setForm]       = useState(emptyForm())
+  const [editingId,  setEditingId]  = useState<string | null>(null)
   const [filterType, setFilterType] = useState<EntryType | 'all'>('all')
 
   const categoriesForType = getCategoriesByType(form.type)
 
-  function persist(next: RecurringTemplate[]) {
-    setTemplates(next)
-    saveToStorage(next)
-  }
+  useEffect(() => {
+    const q = query(
+      collection(db, 'users', uid, 'recurring_templates'),
+      orderBy('createdAt', 'asc'),
+    )
+    return onSnapshot(q, (snap) => {
+      setTemplates(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as RecurringTemplate))
+    })
+  }, [uid])
 
   function handleTypeChange(type: EntryType) {
     setForm((f) => ({ ...f, type, category_id: '' }))
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!form.title || !form.category_id || !form.amount) return
 
     const base = {
-      title: form.title.trim(),
-      type: form.type,
+      title:       form.title.trim(),
+      type:        form.type,
       category_id: form.category_id,
-      amount: Number(form.amount),
-      day: Number(form.day),
+      amount:      Number(form.amount),
+      day:         Number(form.day),
     }
 
     if (editingId) {
-      persist(templates.map((t) => (t.id === editingId ? { ...t, ...base } : t)))
+      await updateDoc(doc(db, 'users', uid, 'recurring_templates', editingId), base)
       setEditingId(null)
     } else {
-      persist([...templates, { id: crypto.randomUUID(), ...base, active: true }])
+      await addDoc(collection(db, 'users', uid, 'recurring_templates'), {
+        ...base,
+        active:    true,
+        createdAt: serverTimestamp(),
+      })
     }
     setForm(emptyForm())
   }
@@ -109,11 +117,11 @@ export function FixedCostsPage() {
   function handleEdit(tpl: RecurringTemplate) {
     setEditingId(tpl.id)
     setForm({
-      title: tpl.title,
-      type: tpl.type,
+      title:       tpl.title,
+      type:        tpl.type,
       category_id: tpl.category_id,
-      amount: String(tpl.amount),
-      day: String(tpl.day),
+      amount:      String(tpl.amount),
+      day:         String(tpl.day),
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -123,19 +131,21 @@ export function FixedCostsPage() {
     setForm(emptyForm())
   }
 
-  function handleDelete(id: string) {
-    persist(templates.filter((t) => t.id !== id))
+  async function handleDelete(id: string) {
+    await deleteDoc(doc(db, 'users', uid, 'recurring_templates', id))
     if (editingId === id) handleCancel()
   }
 
-  function handleToggle(id: string) {
-    persist(templates.map((t) => (t.id === id ? { ...t, active: !t.active } : t)))
+  async function handleToggle(id: string) {
+    const tpl = templates.find((t) => t.id === id)
+    if (!tpl) return
+    await updateDoc(doc(db, 'users', uid, 'recurring_templates', id), { active: !tpl.active })
   }
 
   const filtered = filterType === 'all' ? templates : templates.filter((t) => t.type === filterType)
 
   const fmt = new Intl.NumberFormat(language === 'pt' ? 'pt-BR' : 'en-US', {
-    style: 'currency',
+    style:    'currency',
     currency: language === 'pt' ? 'BRL' : 'USD',
   })
 
@@ -171,7 +181,7 @@ export function FixedCostsPage() {
           )}
         </div>
 
-        <form className="form-grid" onSubmit={handleSubmit}>
+        <form className="form-grid" onSubmit={(e) => { void handleSubmit(e) }}>
           {/* Description */}
           <div className="field">
             <label className="field-label" htmlFor="rc-title">{t('Description', 'Descrição')}</label>
@@ -323,7 +333,7 @@ export function FixedCostsPage() {
                       <label className="toggle" title={tpl.active ? t('Deactivate', 'Desativar') : t('Activate', 'Ativar')}>
                         <input
                           checked={tpl.active}
-                          onChange={() => handleToggle(tpl.id)}
+                          onChange={() => { void handleToggle(tpl.id) }}
                           type="checkbox"
                         />
                         <span className="toggle-slider" />
@@ -357,7 +367,7 @@ export function FixedCostsPage() {
                         </button>
                         <button
                           className="btn-icon"
-                          onClick={() => handleDelete(tpl.id)}
+                          onClick={() => { void handleDelete(tpl.id) }}
                           title={t('Delete', 'Excluir')}
                           type="button"
                         >

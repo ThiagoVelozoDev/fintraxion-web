@@ -1,12 +1,19 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-
-const AUTH_KEY = 'fintraxion_auth'
+import { useAuth } from '../contexts/AuthContext'
 
 export function ProtectedRoute() {
+  const { user, loading } = useAuth()
   const location = useLocation()
-  const isAuthenticated = localStorage.getItem(AUTH_KEY) === 'true'
 
-  if (!isAuthenticated) {
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--text-2)', fontSize: '0.9rem', letterSpacing: '0.05em' }}>
+        Loading…
+      </div>
+    )
+  }
+
+  if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
 

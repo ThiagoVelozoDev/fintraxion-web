@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../../i18n/useLanguage'
-
-const AUTH_KEY = 'fintraxion_auth'
+import { useAuth } from '../../contexts/AuthContext'
 
 const IconLogout = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -26,11 +25,14 @@ type HeaderProps = {
 export function Header({ onMenuToggle }: HeaderProps) {
   const navigate = useNavigate()
   const { language, setLanguage, t } = useLanguage()
+  const { user, signOut } = useAuth()
 
-  function handleLogout() {
-    localStorage.removeItem(AUTH_KEY)
+  async function handleLogout() {
+    await signOut()
     navigate('/login')
   }
+
+  const userInitial = user?.email?.charAt(0).toUpperCase() ?? 'U'
 
   return (
     <header className="topbar">
@@ -65,14 +67,14 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
         <button
           className="btn btn-ghost btn-sm"
-          onClick={handleLogout}
+          onClick={() => { void handleLogout() }}
           type="button"
         >
           <IconLogout />
           <span className="btn-label-desktop">{t('Logout', 'Sair')}</span>
         </button>
 
-        <div className="topbar-avatar" title="User">U</div>
+        <div className="topbar-avatar" title={user?.email ?? 'User'}>{userInitial}</div>
       </div>
     </header>
   )

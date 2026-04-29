@@ -9,9 +9,27 @@ alwaysApply: true
 ## Stack
 
 - Node.js
-- NestJS
-- Prisma
-- PostgreSQL
+- NestJS (using Fastify adapter)
+- Fastify
+- Firebase (Firestore)
+- Firebase Admin SDK
+
+## HTTP Layer (Server)
+
+The application must use Fastify as the HTTP engine via NestJS adapter.
+
+- Use @nestjs/platform-fastify
+- Express must NOT be used
+- All HTTP handling must go through Fastify
+
+## Database Layer (Firebase)
+
+The application must use Firebase Firestore as the primary database.
+
+- Use Firebase Admin SDK on backend
+- No ORM (Prisma must NOT be used)
+- Data access must be abstracted via repositories
+- Collections must represent domain entities
 
 ## Architecture Layers
 
@@ -31,6 +49,7 @@ Contains business rules.
 - services
 - rules
 - validators
+- entities (interfaces/types)
 
 ### 3. Analytics Layer
 
@@ -44,9 +63,11 @@ Handles intelligence.
 
 Handles technical concerns.
 
-- database
+- firebase (config + client)
+- repositories (Firestore access)
 - queues
 - external APIs
+- http (Fastify configuration)
 
 ## Folder Structure
 
@@ -56,10 +77,6 @@ Handles technical concerns.
   /domain
   /analytics
   /infra
-```
-
-## Rules
-
-- No business logic in controllers
-- Services must be reusable
-- Analytics must be isolated
+    /firebase
+    /repositories
+    /http

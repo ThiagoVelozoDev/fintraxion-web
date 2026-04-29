@@ -10,6 +10,10 @@ alwaysApply: true
 
 This application models personal finance using enterprise financial principles, where users operate as a financial entity.
 
+The domain layer is database-agnostic but must be compatible with Firebase (Firestore) constraints.
+
+---
+
 ## Core Entities
 
 ### 1. Transactions
@@ -27,9 +31,15 @@ Represents all financial movements.
 - amount
 - type
 - categoryId
+- categoryName (duplicated for read optimization)
 - accountId
+- accountName (duplicated for read optimization)
 - date
 - description
+- createdAt
+- updatedAt
+
+---
 
 ### 2. Categories
 
@@ -42,6 +52,15 @@ Classifies transactions.
 - INVESTMENT
 - INCOME
 
+**Attributes:**
+
+- id
+- name
+- type
+- createdAt
+
+---
+
 ### 3. Accounts
 
 Represents financial containers.
@@ -52,17 +71,33 @@ Represents financial containers.
 - Wallet
 - Credit card
 
+**Attributes:**
+
+- id
+- name
+- type
+- balance (can be cached / derived)
+- createdAt
+
+---
+
 ### 4. Debts
 
 Represents liabilities.
 
 **Attributes:**
 
+- id
+- accountId
+- accountName (duplicated)
 - totalAmount
 - remainingAmount
 - interestRate
 - dueDate
 - installmentValue
+- createdAt
+
+---
 
 ### 5. Investments
 
@@ -70,10 +105,14 @@ Represents capital allocation.
 
 **Attributes:**
 
+- id
 - type
 - investedAmount
 - currentValue
 - yield
+- createdAt
+
+---
 
 ## Financial Concepts
 
@@ -83,6 +122,8 @@ Represents capital allocation.
 - **Liabilities** = debts
 - **Assets** = investments + available balance
 
+---
+
 ## Derived Metrics
 
 - Net Profit
@@ -90,8 +131,13 @@ Represents capital allocation.
 - Debt Ratio
 - Net Worth
 
+---
+
 ## Rules
 
 - Every transaction must be categorized
-- No orphan financial records
+- No orphan financial records (must be validated at application level)
 - Historical data must never be overwritten
+- Domain must NOT depend on Firebase directly
+- Data consistency must be enforced via services
+- Critical reference data should be duplicated for read performance
