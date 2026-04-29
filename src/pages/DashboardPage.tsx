@@ -74,13 +74,24 @@ function pct(part: number, total: number): number {
   return Math.round((part / total) * 100)
 }
 
+function currentMonthValue(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+}
+
+function monthLabel(ym: string, lang: string): string {
+  const [y, m] = ym.split('-')
+  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString(lang === 'pt' ? 'pt-BR' : 'en-US', { month: 'long', year: 'numeric' })
+}
+
 export function DashboardPage() {
   const { user } = useAuth()
   const uid = user!.uid
   const { t, language } = useLanguage()
 
-  const [entries,   setEntries]   = useState<FinancialEntry[]>([])
-  const [recurring, setRecurring] = useState<RecurringTemplate[]>([])
+  const [entries,       setEntries]       = useState<FinancialEntry[]>([])
+  const [recurring,     setRecurring]     = useState<RecurringTemplate[]>([])
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthValue)
 
   useEffect(() => {
     const q = query(collection(db, 'users', uid, 'transactions'), orderBy('createdAt', 'desc'))
@@ -100,14 +111,9 @@ export function DashboardPage() {
     [language],
   )
 
-  const currentMonthStr = useMemo(() => {
-    const now = new Date()
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  }, [])
-
   // ── Data slices ──────────────────────────────────────────────
   const activeRecurring = useMemo(() => recurring.filter((r) => r.active), [recurring])
-  const monthEntries    = useMemo(() => entries.filter((e) => e.date.startsWith(currentMonthStr)), [entries, currentMonthStr])
+  const monthEntries    = useMemo(() => entries.filter((e) => e.date.startsWith(selectedMonth)), [entries, selectedMonth])
 
   // ── Monthly totals (recurring + one-time this month) ─────────
   const totalRevenue    = useMemo(() =>
@@ -226,9 +232,20 @@ export function DashboardPage() {
 
   return (
     <div className="page-content">
-      <div className="page-header">
-        <h2>{t('Executive Dashboard', 'Painel Executivo')}</h2>
-        <p>{t('Core indicators to guide your strategic decisions.', 'Indicadores centrais para orientar suas decisões estratégicas.')}</p>
+      <div className="page-header page-header-row">
+        <div>
+          <h2>{t('Executive Dashboard', 'Painel Executivo')}</h2>
+          <p>{t('Core indicators to guide your strategic decisions.', 'Indicadores centrais para orientar suas decisões estratégicas.')}</p>
+        </div>
+        <div className="month-picker">
+          <label className="month-picker-label">{t('Period', 'Período')}</label>
+          <input
+            className="month-picker-input"
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            type="month"
+            value={selectedMonth}
+          />
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -245,7 +262,7 @@ export function DashboardPage() {
           <div className="card-header">
             <div>
               <p className="card-title">{t('Budget Allocation', 'Alocação de Orçamento')}</p>
-              <p className="card-subtitle">{t('Revenue distribution this month', 'Distribuição da receita este mês')}</p>
+              <p className="card-subtitle">{monthLabel(selectedMonth, language)}</p>
             </div>
           </div>
           {!hasAnyData ? (

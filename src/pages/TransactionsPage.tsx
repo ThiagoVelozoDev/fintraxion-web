@@ -55,8 +55,14 @@ function todayStr(): string {
   return new Date().toISOString().split('T')[0]
 }
 
-function currentMonthLabel(): string {
-  return new Date().toLocaleDateString('default', { month: 'long', year: 'numeric' })
+function currentMonthValue(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+}
+
+function monthLabel(ym: string, lang: string): string {
+  const [y, m] = ym.split('-')
+  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString(lang === 'pt' ? 'pt-BR' : 'en-US', { month: 'long', year: 'numeric' })
 }
 
 export function TransactionsPage() {
@@ -64,8 +70,9 @@ export function TransactionsPage() {
   const uid = user!.uid
   const { t, language } = useLanguage()
 
-  const [entries,   setEntries]   = useState<FinancialEntry[]>([])
-  const [recurring, setRecurring] = useState<RecurringTemplate[]>([])
+  const [entries,       setEntries]       = useState<FinancialEntry[]>([])
+  const [recurring,     setRecurring]     = useState<RecurringTemplate[]>([])
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthValue)
 
   const [title,      setTitle]      = useState('')
   const [type,       setType]       = useState<EntryType>('variable_cost')
@@ -124,6 +131,7 @@ export function TransactionsPage() {
   )
 
   const activeRecurring = recurring.filter((r) => r.active)
+  const monthEntries    = useMemo(() => entries.filter((e) => e.date.startsWith(selectedMonth)), [entries, selectedMonth])
 
   // ── Saldo dos fixos ──────────────────────────────────────────
   const recurringIn  = useMemo(
@@ -136,14 +144,14 @@ export function TransactionsPage() {
   )
   const recurringBalance = recurringIn - recurringOut
 
-  // ── Saldo dos avulsos ────────────────────────────────────────
+  // ── Saldo dos avulsos (mês selecionado) ──────────────────────
   const entriesIn  = useMemo(
-    () => entries.filter((e) =>  TYPE_META[e.type].positive).reduce((s, e) => s + e.amount, 0),
-    [entries],
+    () => monthEntries.filter((e) =>  TYPE_META[e.type].positive).reduce((s, e) => s + e.amount, 0),
+    [monthEntries],
   )
   const entriesOut = useMemo(
-    () => entries.filter((e) => !TYPE_META[e.type].positive).reduce((s, e) => s + e.amount, 0),
-    [entries],
+    () => monthEntries.filter((e) => !TYPE_META[e.type].positive).reduce((s, e) => s + e.amount, 0),
+    [monthEntries],
   )
   const entriesBalance = entriesIn - entriesOut
 
@@ -162,9 +170,20 @@ export function TransactionsPage() {
 
   return (
     <div className="page-content">
-      <div className="page-header">
-        <h2>{t('Transactions', 'Lançamentos')}</h2>
-        <p>{t('Monthly view of all financial movements.', 'Visão mensal de todas as movimentações financeiras.')}</p>
+      <div className="page-header page-header-row">
+        <div>
+          <h2>{t('Transactions', 'Lançamentos')}</h2>
+          <p>{t('Monthly view of all financial movements.', 'Visão mensal de todas as movimentações financeiras.')}</p>
+        </div>
+        <div className="month-picker">
+          <label className="month-picker-label">{t('Period', 'Período')}</label>
+          <input
+            className="month-picker-input"
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            type="month"
+            value={selectedMonth}
+          />
+        </div>
       </div>
 
       {/* ── Balance summary ── */}
@@ -225,7 +244,7 @@ export function TransactionsPage() {
           <div>
             <p className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <span style={{ color: 'var(--cyan)' }}><IconRepeat /></span>
-              {t(`Recurring — ${currentMonthLabel()}`, `Fixos — ${currentMonthLabel()}`)}
+              {t(`Recurring — ${monthLabel(selectedMonth, language)}`, `Fixos — ${monthLabel(selectedMonth, language)}`)}
             </p>
             <p className="card-subtitle">
               {t('Auto-populated from your recurring entries.', 'Preenchido automaticamente pelos seus lançamentos fixos.')}
@@ -361,7 +380,7 @@ export function TransactionsPage() {
       <div className="card table-card">
         <div style={{ padding: '1rem 1.25rem 0.75rem', borderBottom: '1px solid var(--border-subtle)' }}>
           <p className="card-title">{t('One-time entries', 'Lançamentos avulsos')}</p>
-          <p className="card-subtitle">{t('Non-recurring transactions', 'Transações não recorrentes')}</p>
+          <p className="card-subtitle">{monthLabel(selectedMonth, language)}</p>
         </div>
         <table>
           <thead>
@@ -375,14 +394,14 @@ export function TransactionsPage() {
             </tr>
           </thead>
           <tbody>
-            {entries.length === 0 ? (
+            {monthEntries.length === 0 ? (
               <tr>
                 <td className="table-empty" colSpan={6}>
-                  {t('No one-time entries yet. Use the form above.', 'Nenhum lançamento avulso. Use o formulário acima.')}
+                  {t('No entries for this period.', 'Nenhum lançamento neste período.')}
                 </td>
               </tr>
             ) : (
-              entries.map((item) => {
+              monthEntries.map((item) => {
                 const meta     = TYPE_META[item.type]
                 const category = getCategoryById(item.category_id)
                 const catName  = category
